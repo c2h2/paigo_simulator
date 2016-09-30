@@ -6,16 +6,18 @@ import random
 
 FPS=25
 
-clock = pygame.time.Clock()
-minutes = 0
-seconds = 0
-ms = 0
+ms=0
+seconds=0
+minutes=0
+uptime=0
 
 pygame.init()
+clock = pygame.time.Clock()
 screen = pygame.display.set_mode((800, 800))
 font = pygame.font.SysFont('Arial', 15)
 black = (0,0,0)
 
+'''we want some motion related global variables'''
 pwm_l=0
 pwm_r=0
 required_pwm_l=0
@@ -28,7 +30,7 @@ actual_speed_r=0
 
 
 def init():
-    ms=0
+    pass
 
 def set_speed(l,r):
     required_speed_l = l
@@ -37,7 +39,7 @@ def set_speed(l,r):
 def set_pwd(l,r):
     pass
 
-def set_goal(x,y,theta)
+def set_goal(x,y,theta):
     pass
 
 
@@ -70,7 +72,7 @@ def update_screen():
 
 
 def run():
-    global ms, seconds, minutes
+    global ms, seconds, minutes, uptime
     
 
     while True: #game loop
@@ -83,8 +85,9 @@ def run():
 
         update_screen()
 
-        ms += clock.tick_busy_loop(FPS)
-
+        diff = clock.tick_busy_loop(FPS)
+        ms += diff
+        uptime += diff
 
 
 init()
