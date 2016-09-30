@@ -24,13 +24,16 @@ black = (0,0,0)
 
 '''constatnt'''
 alex_width = 0.098
-
+object_mass = 1.0
+pwm_acc_rate = 1/500.0
 
 '''we want some motion related global variables'''
 pwm_l=0
 pwm_r=0
-required_pwm_l=0
-required_pwm_r=0
+
+'''reistance in pwm'''
+resistance_l=20
+resistance_r=20
 
 required_speed_l=0
 required_speed_r=0
@@ -49,42 +52,102 @@ pos_theta=0
 goal_x=0
 goal_y=0
 
+'''
+Physics:
+
+pwm affects electirc current
+electric current = (pwm * voltage - backEMF) / wire impedance
+electric current = output force - powertrain resistance
+
+f = force - friction or resistance
+f = m * a
+v = intergal a dt
+d = intergal v at
+
+more physics at _update_physics
+
+'''
+
 
 def init():
-    global pos_x, pos_y, width, height
+    global pos_x, pos_y, width, height, resistance_l, resistance_r
     #pos_x = width/2.0
     #pos_y = height/2.0
 
 
-def set_pwm(l,r):
-    pass
+def control_pwm():
+    global speed_l, speed_r, required_speed_l, required_speed_l, pwm_l, pwm_r
+    learning_rate = 0.5
+    error_speed_l = required_speed_l - abs(speed_l)
+    error_speed_r = required_speed_r - abs(speed_r)
+
+    pwm_l += error_speed_l / 0.5 * learning_rate
+    pwm_r += error_speed_l / 0.5 * learning_rate
+
+    if pwm_l > 255:
+        pwm_l = 255
+    if pwm_r > 255:
+        pwm_r = 255
+
 
 def set_goal(x,y,theta):
     pass
 
 def _update_bot_speed():
-	global speed_l, speed_r, required_speed_l, required_speed_l
-	speed_l = required_speed_l
-	speed_r = required_speed_r
+    global speed_l, speed_r, required_speed_l, required_speed_r, diff_ms
+
+
+    speed_l = required_speed_l
+    speed_r = required_speed_r
+    return
+
+    #TODO fix this function below
+   
+    #resistance in accelation m/s2, consists of constant + a factor of speed due to transmission loss and random surface friction.
+    #simulate resistance
+    acc_l = pwm_l * pwm_acc_rate - speed_l * ( 0.1 + random.uniform(0.05, 0.2)) - 0.01
+    acc_r = pwm_r * pwm_acc_rate - speed_r * ( 0.1 + random.uniform(0.05, 0.2)) - 0.01
+
+    if(abs(required_speed_l) < 0.01 and abs(required_speed_r) < 0.01):
+        return 
+
+
+    if(speed_l < 0):
+        speed_l -= acc_l * diff_ms / 1000.0
+    #elif(abs(speed_l) < 0.02):
+    #    speed_l = 0.0
+    else:
+        speed_l += acc_l * diff_ms / 1000.0
+
+    if(speed_r < 0):
+        speed_r -= acc_r * diff_ms / 1000.0
+    #elif(abs(speed_r) < 0.02):
+    #    speed_r = 0.0
+    else:
+        speed_r += acc_r * diff_ms / 1000.0
+
+
+    control_pwm()
+
 
 
 def _update_physics():
     global diff_ms, alex_width, pos_x, pos_y, pos_theta
-    icc_r = (alex_width/2.0) * (speed_l + speed_r) / (speed_r - speed_l + 0.000001) 
-    '''+0.000001 is for divide by zero '''
+    diff_s = diff_ms / 1000.0
+    icc_r = (alex_width/2.0) * (speed_l + speed_r) / (speed_r - speed_l + 0.00000001) 
     icc_omega = (speed_r - speed_l) / alex_width
     avg_speed = (speed_l + speed_r) / 2 
-    pos_theta += icc_omega * diff_ms / 1000.0
+    pos_theta += icc_omega * diff_s
     pos_theta = pos_theta % (2* math.pi)
-    pos_x += avg_speed * diff_ms / 1000.0 * math.cos(pos_theta)
-    pos_y += avg_speed * diff_ms / 1000.0 * math.sin(pos_theta)
+    pos_x += avg_speed * diff_s * math.cos(pos_theta)
+    pos_y += avg_speed * diff_s * math.sin(pos_theta)
 
 
 def _clear_screen():
     screen.fill((255,255,255))
 
 def _update_text():
-    global minutes, seconds, ms, width, diff_ms, pos_theta
+    global minutes, seconds, ms, width, diff_ms, pos_theta, pwm_l, pwm_r,speed_r,speed_l
     y_text_pos = 5
     text ="uptime: {}m{}s {}\"".format(minutes, seconds, ms)
     screen.blit(font.render(text, True, black), (width - 100, y_text_pos))
@@ -100,6 +163,14 @@ def _update_text():
     screen.blit(font.render("pos_y: {} m".format(pos_y), True, black), (width - 150, y_text_pos))
     y_text_pos+=10
     screen.blit(font.render("pos_theta: {} rad".format(pos_theta), True, black), (width - 150, y_text_pos))
+    y_text_pos+=10
+    screen.blit(font.render("v_l: {} m/s".format(speed_l), True, black), (width - 150, y_text_pos))
+    y_text_pos+=10
+    screen.blit(font.render("v_r: {} m/s".format(speed_r), True, black), (width - 150, y_text_pos))
+    y_text_pos+=10
+    screen.blit(font.render("pwm_l: {}".format(pwm_l), True, black), (width - 150, y_text_pos))
+    y_text_pos+=10
+    screen.blit(font.render("pwm_r: {}".format(pwm_r), True, black), (width - 150, y_text_pos))
     
     
 
