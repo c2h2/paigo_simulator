@@ -5,12 +5,10 @@
 RFV for left wheel +0-, and IJN for right wheel +0-
 
 
-#differential drive kinematics
-
-[differential drive kinematics](https://chess.eecs.berkeley.edu/eecs149/documentation/differentialDrive.pdf)
 
 
-#ref
+#Reference
 [pygame keys ref](http://www.pygame.org/docs/ref/key.html)
 
+[differential drive kinematics](https://chess.eecs.berkeley.edu/eecs149/documentation/differentialDrive.pdf)
 
