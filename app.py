@@ -19,7 +19,7 @@ width = 800
 height =800
 
 screen = pygame.display.set_mode((width, height))
-font = pygame.font.SysFont('Arial', 15)
+font = pygame.font.SysFont('Arial', 16)
 black = (0,0,0)
 
 '''constatnt'''
@@ -51,6 +51,9 @@ pos_y=0
 pos_theta=0
 goal_x=0
 goal_y=0
+
+icc_r = 0
+icc_omega =0 
 
 '''
 Physics:
@@ -132,7 +135,7 @@ def _update_bot_speed():
 
 
 def _update_physics():
-    global diff_ms, alex_width, pos_x, pos_y, pos_theta
+    global diff_ms, alex_width, pos_x, pos_y, pos_theta, icc_r, icc_omega
     diff_s = diff_ms / 1000.0
     icc_r = (alex_width/2.0) * (speed_l + speed_r) / (speed_r - speed_l + 0.00000001) 
     icc_omega = (speed_r - speed_l) / alex_width
@@ -147,7 +150,7 @@ def _clear_screen():
     screen.fill((255,255,255))
 
 def _update_text():
-    global minutes, seconds, ms, width, diff_ms, pos_theta, pwm_l, pwm_r,speed_r,speed_l
+    global minutes, seconds, ms, width, diff_ms, pos_theta, pwm_l, pwm_r,speed_r,speed_l, icc_omega, icc_r
     y_text_pos = 5
     text ="uptime: {}m{}s {}\"".format(minutes, seconds, ms)
     screen.blit(font.render(text, True, black), (width - 100, y_text_pos))
@@ -158,11 +161,11 @@ def _update_text():
     y_text_pos+=10
     screen.blit(font.render("req_speed_r: {} m/s".format(required_speed_r), True, black), (width - 150, y_text_pos))
     y_text_pos+=10
-    screen.blit(font.render("pos_x: {} m".format(pos_x), True, black), (width - 150, y_text_pos))
+    screen.blit(font.render("pos_x: {} m".format(round(pos_x,3)), True, black), (width - 150, y_text_pos))
     y_text_pos+=10
-    screen.blit(font.render("pos_y: {} m".format(pos_y), True, black), (width - 150, y_text_pos))
+    screen.blit(font.render("pos_y: {} m".format(round(pos_y,3)), True, black), (width - 150, y_text_pos))
     y_text_pos+=10
-    screen.blit(font.render("pos_theta: {} rad".format(pos_theta), True, black), (width - 150, y_text_pos))
+    screen.blit(font.render("pos_theta: {} rad".format(round(pos_theta,3)), True, black), (width - 150, y_text_pos))
     y_text_pos+=10
     screen.blit(font.render("v_l: {} m/s".format(speed_l), True, black), (width - 150, y_text_pos))
     y_text_pos+=10
@@ -171,6 +174,10 @@ def _update_text():
     screen.blit(font.render("pwm_l: {}".format(pwm_l), True, black), (width - 150, y_text_pos))
     y_text_pos+=10
     screen.blit(font.render("pwm_r: {}".format(pwm_r), True, black), (width - 150, y_text_pos))
+    y_text_pos+=10
+    screen.blit(font.render("icc_omega: {} rad/s".format(round(icc_omega,3)), True, black), (width - 150, y_text_pos))
+    y_text_pos+=10
+    screen.blit(font.render("icc_r: {} m".format(round(icc_r,3)), True, black), (width - 150, y_text_pos))
     
     
 
