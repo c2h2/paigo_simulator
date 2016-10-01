@@ -153,7 +153,7 @@ def _update_text():
     global minutes, seconds, ms, screen_width, diff_ms, pos_theta, pwm_l, pwm_r,speed_r,speed_l, icc_omega, icc_r
     y_text_pos = 5
     text ="uptime: {}m{}s {}\"".format(minutes, seconds, ms)
-    screen.blit(font.render(text, True, black), (screen_width - 100, y_text_pos))
+    screen.blit(font.render(text, True, black), (screen_width - 150, y_text_pos))
     y_text_pos+=10
     screen.blit(font.render("diff: {} ms".format(diff_ms), True, black), (screen_width - 150, y_text_pos))
     y_text_pos+=10
@@ -183,22 +183,36 @@ def _update_text():
 
 
 def _draw_bot():
-    global pos_x, pos_y, pos_theta, wdith, screen_height, icc_r
+    global pos_x, pos_y, pos_theta, screen_wdith, screen_height, icc_r
     color = (200,200,200)
     radius = 5
-    ratio = 20.0
+    ratio = 40.0
     pix_x = int(pos_x * ratio+ screen_width / 2.0)
     pix_y = int(screen_height / 2.0 - pos_y * ratio)
+
+    #rulers
+    ruler_color = (200,200,200)
+    pygame.draw.line(screen, ruler_color, (0, screen_height/2), (screen_width, screen_height/2))
+    pygame.draw.line(screen, ruler_color, (screen_width/2, 0), (screen_width/2, screen_height))
+    screen.blit(font.render("{} m".format(round(screen_width/2/ratio),3), True, ruler_color), (screen_width - 40, screen_height/2+10))
+    screen.blit(font.render("{} m".format(round(-screen_width/2/ratio),3), True, ruler_color), (10, screen_height/2+10))
+    screen.blit(font.render("{} m".format(round(screen_height/2/ratio),3), True, ruler_color), (screen_width/2 + 10, 5))
+    screen.blit(font.render("{} m".format(round(-screen_height/2/ratio),3), True, ruler_color), (screen_width/2 + 10, screen_height-20))
+    
+
+    # bot
     pygame.draw.circle(screen, color, (pix_x,pix_y), radius*2)
     pygame.draw.line(screen, (200, 0, 0), (pix_x, pix_y), (pix_x+math.cos(pos_theta)*(radius+1), pix_y-math.sin(pos_theta)*(radius+1)))
     
+   
+
     #trajectory
     traj_color =  (50, 200, 50)
     if icc_r > 100 and (speed_l > 0 or speed_r > 0):
         pygame.draw.line(screen, traj_color, (pix_x+math.cos(pos_theta)*(radius+3), pix_y-math.sin(pos_theta)*(radius+3)),(pix_x+math.cos(pos_theta)*(radius+1000), pix_y-math.sin(pos_theta)*(radius+1000)))
     
     if abs(icc_r * ratio) > 1 and abs(icc_r) < 100:
-        pygame.draw.circle(screen, traj_color, (int(pix_x - math.sin(pos_theta)*(icc_r*ratio)), int(pix_y-math.cos(pos_theta)*(icc_r*ratio))), int(abs(icc_r*ratio)), 1)
+        pygame.draw.circle(screen, traj_color, (int(round(pix_x - math.sin(pos_theta)*(icc_r*ratio))), int(round(pix_y-math.cos(pos_theta)*(icc_r*ratio)))), int(round(abs(icc_r*ratio))), 1)
 
 
 def update_world():
@@ -222,17 +236,19 @@ def run():
             minutes += 1
             seconds -= 60
 
+        speed_step = 0.01
+
         events = pygame.event.get()
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
-                    required_speed_l += 0.05
+                    required_speed_l += speed_step
                 if event.key == pygame.K_u:
-                    required_speed_r += 0.05
+                    required_speed_r += speed_step
                 if event.key == pygame.K_v:
-                    required_speed_l -= 0.05
+                    required_speed_l -= speed_step
                 if event.key == pygame.K_n:
-                    required_speed_r -= 0.05
+                    required_speed_r -= speed_step
                 if event.key == pygame.K_f:
                     required_speed_l = 0
                 if event.key == pygame.K_j:
